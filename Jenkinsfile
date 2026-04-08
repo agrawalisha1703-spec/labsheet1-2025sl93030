@@ -51,12 +51,12 @@ print('All tests passed!')
         stage('Deploy') {
             steps {
                 echo 'Deploying to AWS EC2...'
-                sshagent(credentials: ['aws-ec2-key']) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'aws-ec2-key', keyFileVariable: 'SSH_KEY')]) {
                     sh """
-                        scp -o StrictHostKeyChecking=no calculator.py ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
+                        scp -i \$SSH_KEY -o StrictHostKeyChecking=no calculator.py ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
                     """
                     sh """
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'ls -la /home/${EC2_USER}/calculator.py'
+                        ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'ls -la /home/${EC2_USER}/calculator.py'
                     """
                 }
                 echo 'Deployment successful!'
